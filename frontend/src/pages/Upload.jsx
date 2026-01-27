@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 function Upload() {
+  const navigate = useNavigate();
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [result, setResult] = useState(null);
@@ -10,14 +12,13 @@ function Upload() {
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     
-    // validations
     if (selectedFile && selectedFile.type !== 'application/pdf') {
       setError('Only PDF files are allowed');
       return;
     }
     
     if (selectedFile && selectedFile.size > 5 * 1024 * 1024) {
-      setError('File size must be less than 5MB');
+      setError('Max 5MB');
       return;
     }
     
@@ -41,13 +42,10 @@ function Upload() {
       formData.append('contract', file);
 
       const response = await axios.post('/api/analyze', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
-
-      setResult(response.data);
-      console.log('Success:', response.data);
+      
+      navigate(`/results/${response.data.analysisId}`);
 
     } catch (err) {
       setError(err.response?.data?.error || 'Upload failed');
@@ -65,7 +63,6 @@ function Upload() {
         </h1>
 
         <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow">
-          {/* File Input */}
           <div className="mb-4">
             <label className="block text-sm font-medium mb-2">
               Select PDF Contract
@@ -83,7 +80,6 @@ function Upload() {
             />
           </div>
 
-          {/* Selected File Info */}
           {file && (
             <div className="mb-4 p-3 bg-gray-50 rounded">
               <p className="text-sm text-gray-600">
@@ -95,14 +91,12 @@ function Upload() {
             </div>
           )}
 
-          {/* Error Message */}
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded">
               <p className="text-sm text-red-600">{error}</p>
             </div>
           )}
 
-          {/* Submit Button */}
           <button
             type="submit"
             disabled={!file || uploading}
@@ -112,19 +106,13 @@ function Upload() {
           >
             {uploading ? 'Uploading...' : 'Upload & Analyze'}
           </button>
-        </form>
 
-        {/* Success Result */}
-        {result && (
-          <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded">
-            <h3 className="font-semibold text-green-800 mb-2">
-              Upload Successful!
-            </h3>
-            <pre className="text-xs text-gray-600 overflow-auto">
-              {JSON.stringify(result, null, 2)}
-            </pre>
-          </div>
-        )}
+          {uploading && (
+            <p className='text-sm text-gray-500 text-center mt-3'>
+              This may take 15-30 seconds...
+            </p>
+          )}
+        </form>
       </div>
     </div>
   );
