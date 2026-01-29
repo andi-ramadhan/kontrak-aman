@@ -2,4 +2,17 @@
 
 * {
   box-sizing: border-box;
+  scroll-behavior: smooth;
+
+  & h1,
+  h2,
+  h3,
+  h4 {
+    font-family: 'Merriweather', serif;
+  }
+
+  & p,
+  div {
+    font-family: 'Raleway', sans-serif;
+  }
 }
